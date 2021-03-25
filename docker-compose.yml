@@ -1,0 +1,16 @@
+version: '2.4'
+services:
+  db:
+    image: library/postgres:13
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: qweasd
+      POSTGRES_USER: postgres
+      PGDATA: /data/postgres
+    ports:
+    - 5432:5432
+    volumes:
+      - postgres:/data/postgres
+
+volumes:
+  postgres:
