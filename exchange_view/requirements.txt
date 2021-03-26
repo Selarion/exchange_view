@@ -1,0 +1,5 @@
+pyTelegramBotAPI
+telethon
+
+Django
+psycopg2-binary
