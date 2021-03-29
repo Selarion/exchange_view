@@ -1,5 +1,5 @@
 from django.db import models
 
 
-class TgMessages(models.Model):
+class TgMessage(models.Model):
     raw_text = models.TextField()
