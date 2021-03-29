@@ -29,16 +29,21 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'website.apps.WebsiteConfig'
 ]
+
+PROJECT_APPS = [
+    'website.apps.WebsiteConfig',
+    'tg_parser.apps.TgParserConfig',
+]
+INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
