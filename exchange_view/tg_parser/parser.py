@@ -1,59 +1,64 @@
-from telethon.sync import TelegramClient as TelegramClientSync
+import asyncio
+from pathlib import Path
+
 from telethon import TelegramClient
-# from tg_parser.config import API_ID, API_HASH
+
+from tg_parser.config import API_ID, API_HASH, SESSION_NAME
 
 
 class TgParser(TelegramClient):
     def __init__(self, *args, **kwargs):
         self.api_id = API_ID
         self.api_hash = API_HASH
+        session_path = str(Path(__file__).resolve().parent / SESSION_NAME)
         super(TgParser, self).__init__(
-            session='anon_parse_channels',
+            session=session_path,
             api_id=self.api_id,
             api_hash=self.api_hash,
             *args, **kwargs
         )
+        self.start()
 
     # noinspection PyTypeChecker
-    def get_channels(self, and_me=False):
+    async def get_channels(self, *args, **kwargs):
         """
-        Download all Dialogs from Tg and filter it by channels only.
+        Download all Dialogs from Tg and filter by channels only.
         and_me - add myself chat into result
         """
-        dialogs = [d for d in self.get_dialogs()]
-        channels = list(filter(lambda d: d.is_channel, dialogs))
-        if not and_me:
-            channels.append(client.get_me())
+        dialogs = self.iter_dialogs(*args, **kwargs)
+        channels = list(filter(lambda x: x.is_channel, [d async for d in dialogs]))
+
         return channels
 
+    async def get_messages_by_channels(self, channels, *args, **kwargs):
+        tasks = []
+        for c in channels:
+            tasks.append(asyncio.create_task(self._get_messages(c, *args, **kwargs)))
+        messages = [await t for t in tasks]
+        print(messages)
 
-async def main(client):
-    for c in [1, 2, 3, 4, 5]:
-        client.loop.create_task(foo(c))
+    async def _get_messages(self, channel, *args, **kwargs):
+        messages = []
+        async for m in self.iter_messages(channel, *args, **kwargs):
+            print(f'{channel.name} - {m.id}')
+            messages.append(m)
+        return channel, messages
 
 
-async def foo(x):
-    print(x)
-    await asyncio.sleep(random.randint(0, 3))
 
 
-if __name__ == '__main__':
-    import random
-    import sys
-    import time
-    import asyncio
-
-    sys.path[0] = ''
-    from tg_parser.config import API_ID, API_HASH
-
-    client = TgParser()
-    with client:
-        client.loop.run_until_complete(main(client))
-
-    # channels = client.get_channels()
-    # channel_ids = [c.id for c in channels]
-
-    # msg = client.get_messages(channels[0].id, limit=10)
-    # time.sleep(4)
-    # channels = client.get_channels()
-    # print(channels)
+# def main():
+#     client = TgParser()
+#     channels = client.loop.run_until_complete(client.get_channels())
+#     print(channels)
+#     print('finish')
+#
+#
+# if __name__ == '__main__':
+#     import random
+#     import sys
+#     import asyncio
+#
+#     sys.path[0] = ''
+#     from tg_parser.config import API_ID, API_HASH, SESSION_NAME
+#     main()
